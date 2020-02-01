@@ -1,85 +1,90 @@
 ﻿using System;
+using System.Globalization;
 
 namespace BootCamp.Chapter
 {
     class Lesson4
     {
-        const string FirstNameMessage = "Enter your first name: ";
-        const string LastNameMessage = "Enter your last name: ";
+  
+        const string NameMessage = "Enter your name: ";
         const string AgeMessage = "Enter your age: ";
         const string WeightMessage = "Enter your weight (in kg): ";
-        const string HeightMessage = "Enter your height (in meters): ";
+        const string HeightMessage = "Enter your height (in cm): ";
         
-        static string consoleInputWeight;
-        static string consoleInputHeight;
-
         public static void Demo()
         {
-            string firstName = PromptString(FirstNameMessage);
-            string lastName = PromptString(LastNameMessage);
+            float weight = 70;
+            float height = 1.75f;
+            //PromptStats();
+            //PromptStats();
+            Console.Write("CalculateBmi: {0}", CalculateBmi(weight, height));
+        }
+
+        public static void PromptStats()
+        {
+            string name = PromptString(NameMessage);
             int age = PromptInt(AgeMessage);
             float weight = PromptFloat(WeightMessage);
             float height = PromptFloat(HeightMessage);
             float bmi = CalculateBmi(weight, height);
 
-            const string response = "{0} {1} is {2} years old, he has a BMI of {3} with a weight of {4} kg and a height of {5} meters.";
-            if (bmi > 0) { Console.WriteLine(response, firstName, lastName, age, bmi, weight, height); }
-        }
-
-        public static int PromptInt(string message)
-        {
-            Console.Write(message);
-            string input = Console.ReadLine();
-
-            bool isInteger = int.TryParse(input, out int number);
-            if (isInteger) { return number; }
-
-            Console.WriteLine("\"" + input + "\"" + " is not a valid number.");
-            return (GotInput(input)) ? -1 : 0;
-        }
-
-        public static string PromptString(string message)
-        {
-            Console.Write(message);
-            string input = Console.ReadLine();
-            
-            bool gotInput = !(string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input));
-            if (gotInput) { return input; }
-            Console.WriteLine("Name cannot be empty.");
-
-            return "-";
+            const string response = "{name} is {age} years old, he has a BMI of {bmi} with a weight of {weight} kg and a height of {height} meters.";
+            if (bmi > 0) { Console.WriteLine(response, name, age, bmi, weight, height); }
         }
 
         public static float PromptFloat(string message)
         {
-            Console.Write(message);
-            string input = Console.ReadLine();
+            string input = PromptInput(message);
 
-            if (message.Equals(WeightMessage)) { consoleInputWeight = input; }
-            if (message.Equals(HeightMessage)) { consoleInputHeight = input; }
+            bool isFloat = float.TryParse(input, NumberStyles.Float, CultureInfo.InvariantCulture, out float result);
+            if (isFloat) { return result; }
 
-            bool isFloat = float.TryParse(input, out float number);
-            if (isFloat) { return number; }
-
-            Console.WriteLine("\"" + input + "\"" + " is not a valid number.");
-            return (GotInput(input)) ? -1 : 0;            
+            PrintIsInvalidNumber(input);
+            return (string.IsNullOrEmpty(input)) ? 0 : -1;
         }
+
+        public static int PromptInt(string message)
+        {
+            string input = PromptInput(message);
+
+            bool isInteger = int.TryParse(input, out int number);
+            if (isInteger) { return number; }
+
+            PrintIsInvalidNumber(input);
+            return (string.IsNullOrEmpty(input)) ? 0 : -1;
+        }
+
+        public static void PrintIsInvalidNumber(string input)
+        {
+            Console.WriteLine("\"" + input + "\"" + " is not a valid number.");
+        } 
+
+        public static string PromptString(string message)
+        {
+            string input = PromptInput(message);
+
+            if (!string.IsNullOrEmpty(input)) { return input; }
+            
+            Console.WriteLine("Name cannot be empty.");
+            return "-";
+        }        
 
         public static float CalculateBmi(float weight, float height)
         {
             if (height <= 0 || weight <= 0)
             {
                 Console.WriteLine("Failed calculating BMI. Reason:");
-                if (height <= 0) { Console.WriteLine("Height cannot be less than zero, but was {0}.", consoleInputHeight); }
-                if (weight <= 0) { Console.WriteLine("Weight cannot be less than zero, but was {0}.", consoleInputWeight); }
-                return 0;
+                if (height <= 0) { Console.WriteLine("Height cannot be less than zero, but was {0}.", height); }
+                if (weight <= 0) { Console.WriteLine("Weight cannot be equal or less than zero, but was {0}.", weight); }
+                return -1;
             }
-            return weight / (height * height);
+            return weight / height / height;
         }
 
-        public static bool GotInput(string input)
+        public static string PromptInput(string message)
         {
-            return !(string.IsNullOrEmpty(input) || string.IsNullOrWhiteSpace(input));
+            Console.Write(message);
+            return Console.ReadLine().Trim();
         }
     }
 }
